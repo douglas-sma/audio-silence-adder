@@ -1,0 +1,33 @@
+# Entorno virtual
+venv/
+env/
+.venv/
+
+# Archivos de Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Archivos de prueba
+test_audio*
+*.tmp
+temp_*
+
+# Archivos de salida comunes
+*_con_silencio.*
+*_with_silence.*
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
