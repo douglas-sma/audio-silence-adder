@@ -19,6 +19,9 @@ temp_*
 *_con_silencio.*
 *_with_silence.*
 
+# Audio de entrada
+Audio/
+
 # Archivos del sistema
 .DS_Store
 Thumbs.db

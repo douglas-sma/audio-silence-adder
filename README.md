@@ -72,8 +72,11 @@ python add_silence.py cancion.m4a --silencio 2 --format flac
 # Especificar archivo de salida
 python add_silence.py cancion.mp3 --silencio 2.5 --output cancion_modificada.mp3
 
-# Procesar múltiples archivos
-python add_silence.py *.mp3 --silencio 3
+# Procesar múltiples archivos (mismo formato y silencio para todos)
+python add_silence.py *.mp3 --silencio 3 --format m4a
+
+# Procesar múltiples archivos con settings distintos por archivo
+python add_silence.py vocal.m4a instrumental.mp3 -s 3 -s 2 -f m4a -f flac
 
 # Procesar manteniendo formato original (por defecto)
 python add_silence.py cancion.flac --silencio 1.5 --format original
@@ -103,7 +106,7 @@ python add_silence.py "Artista - Canción.m4a" --silencio 4
 python add_silence.py "./Audio/Mi Canción (Remix).mp3" --silencio 2
 ```
 
-### Ejemplo 4: Múltiples archivos
+### Ejemplo 4: Múltiples archivos (mismo setting global)
 ```bash
 python add_silence.py cancion1.mp3 cancion2.wav cancion3.flac --silencio 5 --format m4a
 ```
@@ -112,7 +115,18 @@ python add_silence.py cancion1.mp3 cancion2.wav cancion3.flac --silencio 5 --for
 - `cancion2_con_silencio.m4a`
 - `cancion3_con_silencio.m4a`
 
-### Ejemplo 5: Todos los archivos de una carpeta
+### Ejemplo 5: Múltiples archivos (settings por archivo)
+```bash
+# Cada archivo con su propio silencio y formato
+python add_silence.py vocal.m4a instrumental.mp3 -s 3 -s 2 -f m4a -f flac
+```
+**Resultado:**
+- `vocal_con_silencio.m4a` (3s de silencio)
+- `instrumental_con_silencio.flac` (2s de silencio)
+
+> Las flags `-s` y `-f` se repiten por archivo. Si solo das un valor, se aplica a todos.
+
+### Ejemplo 6: Todos los archivos de una carpeta
 ```bash
 # Procesar todos los MP3 de una carpeta
 python add_silence.py ./Audio/*.mp3 --silencio 3

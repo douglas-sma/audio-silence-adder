@@ -302,21 +302,42 @@ Ejemplos de uso:
   python add_silence.py audio.wav --silencio 5 --output audio_modificado.wav
   python add_silence.py *.mp3 --silencio 2.5
   python add_silence.py cancion.mp3 --silencio 3 --format flac
-  python add_silence.py cancion.m4a --silencio 2 --format m4a
+
+  # Per-file settings (repite la flag por archivo)
+  python add_silence.py vocal.m4a instrumental.mp3 -s 3 -s 2 -f m4a -f flac
+  python add_silence.py vocal.m4a instrumental.mp3 -s 3 -f flac
         """,
     )
 
     parser.add_argument('archivos', nargs='+', help='Archivo(s) de audio a procesar')
-    parser.add_argument('--silencio', '-s', type=float, default=1.5,
-                        help='Duración del silencio en segundos (0.1-10, por defecto: 1.5)')
+    parser.add_argument('--silencio', '-s', type=float, default=[], action='append',
+                        help='Duración del silencio en segundos. Repite por archivo o usa uno global (0.1-10)')
     parser.add_argument('--output', '-o', help='Archivo de salida (solo para un archivo)')
-    parser.add_argument('--format', '-f', choices=['m4a', 'flac', 'original'], default='original',
-                        help='Formato de salida: m4a, flac, u original (mantener formato original)')
+    parser.add_argument('--format', '-f', default=[], action='append',
+                        choices=['m4a', 'flac', 'original'],
+                        help='Formato de salida. Repite por archivo o usa uno global')
 
     args = parser.parse_args()
 
     if len(args.archivos) > 1 and args.output:
         print("❌ Error: No se puede especificar --output cuando se procesan múltiples archivos")
+        return 1
+
+    # Si no se especificaron valores, usar defaults
+    silencios = args.silencio or [1.5]
+    formatos = args.format or ['original']
+
+    # Broadcast valores únicos
+    if len(silencios) == 1:
+        silencios = silencios * len(args.archivos)
+    if len(formatos) == 1:
+        formatos = formatos * len(args.archivos)
+
+    if len(silencios) != len(args.archivos):
+        print(f"❌ Error: Se especificaron {len(silencios)} valores de silencio para {len(args.archivos)} archivos")
+        return 1
+    if len(formatos) != len(args.archivos):
+        print(f"❌ Error: Se especificaron {len(formatos)} formatos para {len(args.archivos)} archivos")
         return 1
 
     adder = AudioSilenceAdder()
@@ -327,14 +348,14 @@ Ejemplos de uso:
     archivos_procesados = 0
     errores = 0
 
-    for archivo in args.archivos:
+    for archivo, silencio, formato in zip(args.archivos, silencios, formatos):
         try:
             print(f"\n📂 Procesando: {archivo}")
             resultado = adder.add_silence_to_beginning(
                 archivo,
-                args.silencio,
+                silencio,
                 args.output,
-                args.format,
+                formato,
             )
             archivos_procesados += 1
 
