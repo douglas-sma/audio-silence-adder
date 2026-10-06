@@ -1,268 +1,139 @@
 # Agregador de Silencio 🎵
 
-Una herramienta para agregar silencio al principio de archivos de audio, manteniendo todas las propiedades y formato originales.
+Herramienta para agregar silencio al inicio de archivos de audio, conservando
+los metadatos (título, artista, álbum, **carátulas**, etc.) y la calidad del audio.
 
 ## Características
 
-- ✅ Mantiene el formato original del audio o permite convertir a M4A/FLAC
-- ✅ Preserva **TODOS** los metadatos (título, artista, álbum, carátulas, letras, etc.)
-- ✅ Conserva la calidad de audio original (bitrate, bits por muestra, frecuencia)
-- ✅ Soporta múltiples formatos: MP3, WAV, FLAC, OGG, M4A, AAC
-- ✅ Análisis detallado de propiedades del audio
-- ✅ Silencio configurable de 0.1 a 10 segundos
-- ✅ Copia automática de carátulas de álbum y artwork
+- ✅ **Carpetas obligatorias `Input/` y `Output/`**: dejas los audios en `Input/` y los resultados salen en `Output/`.
+- ✅ **CLI interactivo** (`cli.py`) y **CLI por argumentos** (`add_silence.py`).
+- ✅ **Conserva los metadatos** entre formatos (MP3 ↔ FLAC ↔ M4A ↔ …) usando ffmpeg.
+- ✅ **Conserva la carátula** (imagen embebida) cuando el formato de salida la soporta.
+- ✅ **Limpia etiquetas basura** que suelen inyectar ffmpeg/contenedor (`major_brand`, `encoder`, `TSSE`, …).
+- ✅ Mantiene la **profundidad de bits** y la frecuencia de muestreo originales (24-bit, 16-bit, etc.).
+- ✅ Respeta el **bitrate original** al reconvertir formato (con topes razonables).
+- ✅ El archivo original **nunca se modifica**.
+- ✅ Silencio configurable de **0.1 a 10 segundos**.
+
+## Requisitos
+
+- Python 3.8+
+- **ffmpeg / ffprobe** instalados en el sistema:
+  ```bash
+  sudo apt install ffmpeg     # Debian/Ubuntu
+  sudo pacman -S ffmpeg       # Arch
+  brew install ffmpeg         # macOS
+  ```
 
 ## Instalación
 
-1. Crea un entorno virtual (recomendado):
 ```bash
 python3 -m venv venv
 source venv/bin/activate
-```
-
-2. Instala las dependencias:
-```bash
 pip install -r requirements.txt
 ```
-
-### Uso Rápido
-
-Puedes usar el script de activación automática:
-```bash
-# Activar entorno y abrir shell
-./run.sh
-
-# O ejecutar directamente con argumentos
-./run.sh archivo.mp3 --silencio 1.5
-```
-
-## Uso
-
-### Versión Simple (Interactiva)
-
-Para uso rápido y fácil:
-
-```bash
-python simple_silence.py
-```
-
-El script te guiará paso a paso:
-1. Selecciona el archivo de audio
-2. Elige la duración del silencio (1.5s, 5s, 10s o personalizado)
-3. Elige el formato de salida (M4A, FLAC, u original)
-4. ¡Listo! El archivo se guarda automáticamente
-
-### Versión Avanzada (Línea de comandos)
-
-Para mayor control y procesamiento en lote:
-
-```bash
-# Agregar 1.5 segundos de silencio (por defecto)
-python add_silence.py cancion.mp3
-
-# Especificar duración personalizada
-python add_silence.py cancion.mp3 --silencio 5
-
-# Convertir a M4A en la salida
-python add_silence.py cancion.wav --silencio 3 --format m4a
-
-# Convertir a FLAC
-python add_silence.py cancion.m4a --silencio 2 --format flac
-
-# Especificar archivo de salida
-python add_silence.py cancion.mp3 --silencio 2.5 --output cancion_modificada.mp3
-
-# Procesar múltiples archivos (mismo formato y silencio para todos)
-python add_silence.py *.mp3 --silencio 3 --format m4a
-
-# Procesar múltiples archivos con settings distintos por archivo
-python add_silence.py vocal.m4a instrumental.mp3 -s 3 -s 2 -f m4a -f flac
-
-# Procesar manteniendo formato original (por defecto)
-python add_silence.py cancion.flac --silencio 1.5 --format original
-
-# Ver ayuda completa
-python add_silence.py --help
-```
-
-## Ejemplos
-
-### Ejemplo 1: Archivo individual
-```bash
-python add_silence.py mi_cancion.mp3 --silencio 1.5
-```
-**Resultado:** `mi_cancion_con_silencio.mp3`
-
-### Ejemplo 2: Convertir a FLAC
-```bash
-python add_silence.py mi_cancion.m4a --silencio 2 --format flac
-```
-**Resultado:** `mi_cancion_con_silencio.flac`
-
-### Ejemplo 3: Archivos con espacios o caracteres especiales
-```bash
-# IMPORTANTE: Usa comillas para nombres con espacios
-python add_silence.py "Artista - Canción.m4a" --silencio 4
-python add_silence.py "./Audio/Mi Canción (Remix).mp3" --silencio 2
-```
-
-### Ejemplo 4: Múltiples archivos (mismo setting global)
-```bash
-python add_silence.py cancion1.mp3 cancion2.wav cancion3.flac --silencio 5 --format m4a
-```
-**Resultado:**
-- `cancion1_con_silencio.m4a`
-- `cancion2_con_silencio.m4a`
-- `cancion3_con_silencio.m4a`
-
-### Ejemplo 5: Múltiples archivos (settings por archivo)
-```bash
-# Cada archivo con su propio silencio y formato
-python add_silence.py vocal.m4a instrumental.mp3 -s 3 -s 2 -f m4a -f flac
-```
-**Resultado:**
-- `vocal_con_silencio.m4a` (3s de silencio)
-- `instrumental_con_silencio.flac` (2s de silencio)
-
-> Las flags `-s` y `-f` se repiten por archivo. Si solo das un valor, se aplica a todos.
-
-### Ejemplo 6: Todos los archivos de una carpeta
-```bash
-# Procesar todos los MP3 de una carpeta
-python add_silence.py ./Audio/*.mp3 --silencio 3
-
-# Si hay espacios en la ruta, usa comillas
-python add_silence.py "./Mi Carpeta"/*.mp3 --silencio 2
-```
-
-## Formatos Soportados
-
-| Formato | Extensión | Metadatos | Carátulas | Calidad | Bitrate Original |
-|---------|-----------|-----------|-----------|---------|------------------|
-| MP3     | .mp3      | ✅ Todos  | ✅        | ✅ 100% | ✅ Preservado    |
-| WAV     | .wav      | ✅ Todos  | ✅        | ✅ 100% | ✅ Preservado    |
-| FLAC    | .flac     | ✅ Todos  | ✅        | ✅ 100% | ✅ Sin pérdidas  |
-| OGG     | .ogg      | ✅ Todos  | ✅        | ✅ 100% | ✅ Preservado    |
-| M4A     | .m4a      | ✅ Todos  | ✅        | ✅ 100% | ✅ Preservado    |
-| AAC     | .aac      | ✅ Todos  | ✅        | ✅ 100% | ✅ Preservado    |
-
-**Nota:** Los formatos M4A y AAC mantienen su bitrate original completo. En caso de problemas de codificación, la herramienta automáticamente intentará guardar como MP3 o WAV manteniendo la máxima calidad posible.
-
-## Formato de Salida
-
-Puedes elegir entre 3 opciones:
-
-| Opción | Descripción | Ideal para |
-|--------|-------------|------------|
-| **M4A** | AAC con buena compresión, excelente calidad | Vocales, pistas con voz |
-| **FLAC** | Sin pérdida, calidad idéntica al original | Instrumental, archivos maestros |
-| **Original** | Mantiene el mismo formato de entrada | Compatibilidad total |
-
-## Análisis de Propiedades
-
-La herramienta analiza y muestra:
-
-- 📊 **Formato y duración**
-- 🔊 **Frecuencia de muestreo**
-- 🎵 **Número de canales (mono/estéreo)**
-- 💾 **Bits por muestra**
-- 📈 **Bitrate**
-- 📁 **Tamaño del archivo**
-- 🏷️ **Metadatos** (título, artista, álbum, etc.)
 
 ## Estructura del Proyecto
 
 ```
 Add silence/
-├── requirements.txt      # Dependencias
-├── add_silence.py       # Script principal (línea de comandos)
-├── simple_silence.py    # Script simple (interactivo)
-└── README.md           # Esta documentación
+├── Input/               # Audios de entrada (creada automáticamente)
+├── Output/              # Resultados (creada automáticamente)
+├── add_silence.py       # Motor + CLI por argumentos
+├── cli.py               # CLI interactivo
+├── run.sh               # Activa el venv y ejecuta la herramienta
+├── requirements.txt     # Dependencias de Python
+└── README.md            # Esta documentación
 ```
 
-## Dependencias
+## Uso
 
-- **pydub**: Manipulación de audio
-- **mutagen**: Manejo de metadatos
-
-## Tips y Mejores Prácticas
-
-### Archivos con Espacios o Caracteres Especiales
-
-**Siempre usa comillas** cuando el nombre del archivo contenga:
-- Espacios: `"Mi Canción.mp3"`
-- Paréntesis: `"Canción (Remix).mp3"`
-- Caracteres Unicode: `"Magic∞world.m4a"`
-- Rutas con espacios: `"./Mi Carpeta/archivo.mp3"`
+### CLI interactivo (recomendado)
 
 ```bash
-# ✅ CORRECTO
-python add_silence.py "Artista - Canción (Remix).mp3" --silencio 4
-
-# ❌ INCORRECTO (sin comillas)
-python add_silence.py Artista - Canción (Remix).mp3 --silencio 4
-# Esto se interpreta como múltiples archivos: Artista, -, Canción, (Remix).mp3
+python cli.py
+# o
+./run.sh
 ```
 
-### Procesamiento en Lote
+El menú paso a paso:
+
+1. Muestra los audios que hay en `Input/` y eliges uno o **todos**.
+2. Eliges la duración del silencio (1.5s, 3s, 5s, 10s o personalizado).
+3. Eliges el formato de salida.
+4. El resultado se guarda automáticamente en `Output/`.
+
+### CLI por argumentos
 
 ```bash
-# Procesar todos los archivos de un formato
-for file in ./Audio/*.m4a; do
-    python add_silence.py "$file" --silencio 4 --format flac
-done
+# Procesar todo lo que haya en Input/ (1.5s, formato original)
+python add_silence.py
 
-# O usar el wildcard directamente
-python add_silence.py ./Audio/*.m4a --silencio 4 --format m4a
+# Un archivo (se resuelve dentro de Input/)
+python add_silence.py cancion.flac --silencio 3
+
+# Convertir a otro formato
+python add_silence.py cancion.m4a -s 2 -f flac
+python add_silence.py cancion.wav -s 3 -f m4a
+
+# Ruta explícita y salida explícita
+python add_silence.py "./Mi Carpeta/tema.mp3" -s 2.5 -o "salida.mp3"
+
+# Varios archivos, un ajuste por archivo
+python add_silence.py vocal.m4a instrumental.mp3 -s 3 -s 2 -f m4a -f flac
+
+# Ayuda
+python add_silence.py --help
 ```
 
-### Verificar metadatos
+> `-s` y `-f` se repiten por archivo. Si pones un solo valor, se aplica a todos.
 
-```bash
-# Ver metadatos de un archivo con mutagen
-python -c "from mutagen import File; f=File('archivo.mp3'); print(f.pprint())"
-```
+## Formatos
 
-## Notas Técnicas
+### Entrada soportada
 
-- ✅ El silencio se genera con las **mismas propiedades exactas** que el audio original
-- ✅ **TODOS** los metadatos se copian íntegramente (incluyendo carátulas, letras, comentarios extendidos)
-- ✅ El **bitrate original** se preserva al mantener el formato; al convertir se usa la máxima calidad
-- ✅ Los **bits por muestra** originales se mantienen (16-bit, 24-bit, etc.)
-- ✅ La **frecuencia de muestreo** se preserva exactamente
-- ✅ El archivo original **nunca se modifica**
-- ✅ La calidad del audio se mantiene **sin pérdidas adicionales**
+`MP3`, `WAV`, `FLAC`, `OGG/OGG`, `OPUS`, `M4A`, `MP4`, `AAC`, `WMA`, `AIFF`.
+
+### Salida
+
+| Formato    | Descripción                         | Carátula |
+|------------|-------------------------------------|----------|
+| `original` | Mismo formato de entrada            | ✅*      |
+| `mp3`      | MP3 (LAME)                          | ✅       |
+| `m4a`      | AAC en contenedor M4A               | ✅       |
+| `flac`     | FLAC sin pérdida                    | ✅       |
+| `wav`      | PCM sin comprimir                   | ❌       |
+| `ogg`      | OGG Vorbis                          | ✅       |
+| `opus`     | OPUS                                | ✅       |
+
+\* La carátula se conserva si el formato de entrada/salida la soporta. `WAV` no
+almacena carátulas, por lo que se omite en ese caso.
+
+## Notas técnicas
+
+- El silencio se añade con el filtro `adelay` de ffmpeg, generando silencio con las
+  mismas propiedades (frecuencia, canales y formato de muestra) que el audio original.
+- Los metadatos se copian con `-map_metadata 0`, que traduce las etiquetas entre
+  contenedores (por ejemplo ID3 ↔ Vorbis ↔ MP4).
+- Las carátulas se leen y reescriben con **mutagen**, de modo que funcionan incluso
+  en OGG/OPUS, donde ffmpeg no las maneja bien.
+- Se eliminan las etiquetas internas de ffmpeg/contenedor para dejar los metadatos limpios.
 
 ## Limitaciones
 
-- Duración máxima de silencio: 10 segundos
-- Requiere que el archivo original sea válido y no esté corrupto
-- Algunos formatos propietarios no están soportados
+- Duración máxima de silencio: 10 segundos.
+- `WAV` y `AIFF` no admiten carátula.
+- Al convertir a un formato **con pérdida** (MP3/M4A/OGG/OPUS) el audio se recodifica,
+  por lo que hay una generación de pérdida inevitable.
 
 ## Solución de Problemas
 
-### Error: "El archivo no existe" con nombres que tienen espacios
-- **Causa:** No usaste comillas en el nombre del archivo
-- **Solución:** Encierra el nombre entre comillas: `"archivo con espacios.mp3"`
-- **Ejemplo:** `python add_silence.py "./Audio/Mi Canción.mp3" --silencio 4`
+### "No se encontró 'ffmpeg'"
+- Instala ffmpeg/ffprobe (ver **Requisitos**).
 
-### Error: "Formato no soportado"
-- Verifica que el archivo tenga una extensión válida
-- Convierte el archivo a un formato soportado
+### "Formato no soportado"
+- Verifica que la extensión del archivo sea una de las soportadas.
 
-### Error: "Encoding failed" con M4A/AAC
-- La herramienta automáticamente intentará guardar como MP3 alternativo
-- Considera convertir tus archivos M4A a MP3 antes del procesamiento
-- Instala ffmpeg completo: `sudo apt install ffmpeg`
-
-### Error: "No se pudieron copiar los metadatos"
-- El archivo se creará correctamente, pero sin algunos metadatos
-- Esto es normal en algunos formatos menos comunes
-
-### Audio con ruido
-- Verifica que el archivo original no esté corrupto
-- Prueba con un archivo de audio diferente
-
----
-
-¿Necesitas ayuda? ¡Crea un issue con los detalles del problema!
+### Los metadatos no aparecen en la salida
+- Asegúrate de tener `mutagen` instalado (`pip install -r requirements.txt`).
+- Algunos formatos (WAV) tienen soporte muy limitado de etiquetas por diseño.

@@ -19,7 +19,11 @@ temp_*
 *_con_silencio.*
 *_with_silence.*
 
-# Audio de entrada
+# Carpetas de trabajo: se ignora el contenido, pero las carpetas se conservan
+Input/*
+!Input/.gitkeep
+Output/*
+!Output/.gitkeep
 Audio/
 
 # Archivos del sistema
@@ -34,3 +38,6 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Configuración de Command Code (taste, etc.)
+.commandcode/

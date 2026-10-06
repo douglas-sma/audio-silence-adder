@@ -1,2 +1,7 @@
-pydub>=0.25.1
+# Dependencias de Python
 mutagen>=1.47.0
+
+# Requiere además ffmpeg/ffprobe instalados en el sistema:
+#   Debian/Ubuntu: sudo apt install ffmpeg
+#   Arch:          sudo pacman -S ffmpeg
+#   macOS:         brew install ffmpeg
